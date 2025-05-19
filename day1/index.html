@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Document</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+  <img src="piano.jpg" alt="piano_image" class="background"/>
+    <h1 class="heading">30 days of Javascript<br> Day One : Piano Chords</h1>
+  <div style="z-index: 2;" class="board">
+    <div data-key="KeyA" data-interval="1" class="key"><kbd>A</kbd><span class="sound">C </span></div>
+      <!--
+    -->
+      <div data-key="KeyW" data-interval="2" class="key black"><kbd>W</kbd><span class="sound">C#<br>Db </span></div>
+    <div data-key="KeyS" data-interval="3" class="key"><kbd>S</kbd><span class="sound">D </span></div>
+      <div data-key="KeyE" data-interval="4" class="key black"><kbd>E</kbd><span class="sound">D#<br>Eb </span></div>
+    <div data-key="KeyD" data-interval="5" class="key"><kbd>D</kbd><span class="sound">E </span></div>
+    <div data-key="KeyF" data-interval="6" class="key"><kbd>F</kbd><span class="sound">F </span></div>
+      <div data-key="KeyT"data-interval="7" class="key black"><kbd>T</kbd><span class="sound">F#<br>Gb </span></div>
+    <div data-key="KeyG" data-interval="8" class="key"><kbd>G</kbd><span class="sound">G </span></div>
+      <div data-key="KeyY" data-interval="9" class="key black"><kbd>Y</kbd><span class="sound">G#<br>Ab </span></div>
+    <div data-key="KeyH" data-interval="10" class="key"><kbd>H</kbd><span class="sound">A </span></div>
+      <div data-key="KeyU" data-interval="11" class="key black"><kbd>U</kbd><span class="sound">A#<br>Bb </span></div>
+    <div data-key="KeyJ" data-interval="12" class="key"><kbd>J</kbd><span class="sound">B </span></div>
+    <div data-key="KeyK" data-interval="13" class="key"><kbd>K</kbd><span class="sound">C2 </span></div>
+      <div data-key="KeyO" data-interval="14" class="key black"><kbd>O</kbd><span class="sound">C2#<br>D2b</span></div>
+    <div data-key="KeyL" data-interval="15" class="key"><kbd>L</kbd><span class="sound">D2 </span></div>
+      <div data-key="KeyP" data-interval="16" class="key black"><kbd>P</kbd><span class="sound">D2#<br>E2b</span></div>
+  </div>
+  <section>
+    <div class="descriptor">
+      <p class="signal">Chord:</p>
+      <p id="chordIdentifier"></p>
+    </div>
+  </section> 
+  <audio data-key="KeyA" src="audio/Cnote.wav"></audio>
+<audio data-key="KeyW" src="audio/Csharpnote.wav"></audio>
+<audio data-key="KeyS" src="audio/Dnote.wav"></audio>
+<audio data-key="KeyE" src="audio/Dsharpnote.wav"></audio>
+<audio data-key="KeyD" src="audio/Enote.wav"></audio>
+<audio data-key="KeyF" src="audio/Fnote.wav"></audio>
+<audio data-key="KeyT" src="audio/Fsharpnote.wav"></audio>
+<audio data-key="KeyG" src="audio/Gnote.wav"></audio>
+<audio data-key="KeyY" src="audio/Gsharpnote.wav"></audio>
+<audio data-key="KeyH" src="audio/Anote.wav"></audio>
+<audio data-key="KeyU" src="audio/Asharpnote.wav"></audio>
+<audio data-key="KeyJ" src="audio/Bnote.wav"></audio>
+<audio data-key="KeyK" src="audio/C2note.wav"></audio>
+<audio data-key="KeyO" src="audio/C2sharpnote.wav"></audio>
+<audio data-key="KeyL" src="audio/D2note.wav"></audio>
+<audio data-key="KeyP" src="audio/D2sharpnote.wav"></audio>
+
+
+<script>
+  const activeKeys = new Set();
+let chordTimeout;
+
+window.addEventListener("keydown", (e) => {
+  if (e.repeat) return;
+
+  const key = document.querySelector(`.key[data-key="${e.code}"]`);
+  const audio = document.querySelector(`audio[data-key="${e.code}"]`);
+  if (!key || !audio) return;
+
+  const interval = parseInt(key.getAttribute("data-interval"));
+  activeKeys.add(interval);
+
+  // Play sound and visual immediately
+  key.classList.add("active");
+  audio.currentTime = 0;
+  audio.play();
+  setTimeout(() => key.classList.remove("active"), 200);
+
+  // Clear any existing chord detection timeout to reset window
+  clearTimeout(chordTimeout);
+
+  // Set a timeout to detect chord after 300ms
+  chordTimeout = setTimeout(() => {
+    // For major chord, check if intervals root, root+4, root+7 exist
+    // We try all possible roots in activeKeys
+    if(activeKeys.size === 4){
+      for (let root of activeKeys) {
+      if (
+        activeKeys.has(root) &&
+        activeKeys.has(root + 4) &&
+        activeKeys.has(root + 7)&&
+        activeKeys.has(root + 10)
+      ) {
+        const div = document.querySelector(`div[data-interval="${root}"]`);
+        console.log("Dominant 7th chord detected with root interval:", div.children[1].textContent);
+        // Optionally do something here (e.g., visual feedback)
+        const chordid = document.getElementById("chordIdentifier")
+        chordid.textContent = `${div.children[1].textContent} Dominant 7th`
+        
+        // Remove these intervals to avoid repeated detection
+        activeKeys.delete(root);
+        activeKeys.delete(root + 4);
+        activeKeys.delete(root + 7);
+        activeKeys.delete(root + 10);
+        break; // stop checking after first chord detected
+      }else if (
+        activeKeys.has(root) &&
+        activeKeys.has(root + 4) &&
+        activeKeys.has(root + 7) &&
+        activeKeys.has(root + 11)
+      ) {
+        const div = document.querySelector(`div[data-interval="${root}"]`);
+        console.log("Major 7th chord detected with root interval:", div.children[1].textContent);
+        // Optionally do something here (e.g., visual feedback)
+        const chordid = document.getElementById("chordIdentifier")
+        chordid.textContent = `${div.children[1].textContent} Major 7th`
+        
+        // Remove these intervals to avoid repeated detection
+        activeKeys.delete(root);
+        activeKeys.delete(root + 4);
+        activeKeys.delete(root + 7);
+        activeKeys.delete(root + 11);
+        break; // stop checking after first chord detected
+      }else if (
+        activeKeys.has(root) &&
+        activeKeys.has(root + 3) &&
+        activeKeys.has(root + 7) &&
+        activeKeys.has(root + 10)
+      ) {
+        const div = document.querySelector(`div[data-interval="${root}"]`);
+        console.log("Minor Seventh chord detected with root interval:", div.children[1].textContent);
+        // Optionally do something here (e.g., visual feedback)
+        const chordid = document.getElementById("chordIdentifier")
+        chordid.textContent = `${div.children[1].textContent} Minor 7th`
+        
+        // Remove these intervals to avoid repeated detection
+        activeKeys.delete(root);
+        activeKeys.delete(root + 3);
+        activeKeys.delete(root + 7);
+        activeKeys.delete(root + 10)
+        break; // stop checking after first chord detected
+      }else if (
+        activeKeys.has(root) &&
+        activeKeys.has(root + 3) &&
+        activeKeys.has(root + 6) &&
+        activeKeys.has(root + 10)
+      ) {
+        const div = document.querySelector(`div[data-interval="${root}"]`);
+        console.log("Half Diminished Seventh chord detected with root interval:", div.children[1].textContent);
+        // Optionally do something here (e.g., visual feedback)
+        const chordid = document.getElementById("chordIdentifier")
+        chordid.textContent = `${div.children[1].textContent} Half Diminished 7th`
+        
+        // Remove these intervals to avoid repeated detection
+        activeKeys.delete(root);
+        activeKeys.delete(root + 3);
+        activeKeys.delete(root + 6);
+        activeKeys.delete(root + 10)
+        break; // stop checking after first chord detected
+      }else if (
+        activeKeys.has(root) &&
+        activeKeys.has(root + 3) &&
+        activeKeys.has(root + 6) &&
+        activeKeys.has(root + 9)
+      ) {
+        const div = document.querySelector(`div[data-interval="${root}"]`);
+        console.log("Diminished Seventh chord detected with root interval:", div.children[1].textContent);
+        // Optionally do something here (e.g., visual feedback)
+        const chordid = document.getElementById("chordIdentifier")
+        chordid.textContent = `${div.children[1].textContent} Diminished 7th`
+        
+        // Remove these intervals to avoid repeated detection
+        activeKeys.delete(root);
+        activeKeys.delete(root + 3);
+        activeKeys.delete(root + 6);
+        activeKeys.delete(root + 9)
+        break; // stop checking after first chord detected
+      }
+    
+
+      }
+    }else if (activeKeys.size === 3){
+      for (let root of activeKeys) {
+      if (
+        activeKeys.has(root) &&
+        activeKeys.has(root + 4) &&
+        activeKeys.has(root + 7)
+      ) {
+        const div = document.querySelector(`div[data-interval="${root}"]`);
+        const chordid = document.getElementById("chordIdentifier")
+        console.log("Major chord detected with root interval:", div.children[1].textContent);
+        chordid.textContent = `${div.children[1].textContent} Major`
+        // Optionally do something here (e.g., visual feedback)
+        
+        // Remove these intervals to avoid repeated detection
+        activeKeys.delete(root);
+        activeKeys.delete(root + 4);
+        activeKeys.delete(root + 7);
+        break; // stop checking after first chord detected
+      }else if (
+        activeKeys.has(root) &&
+        activeKeys.has(root + 3) &&
+        activeKeys.has(root + 7)
+      ) {
+        const div = document.querySelector(`div[data-interval="${root}"]`);
+        console.log("Minor chord detected with root interval:", div.children[1].textContent);
+        // Optionally do something here (e.g., visual feedback)
+        const chordid = document.getElementById("chordIdentifier")
+        chordid.textContent = `${div.children[1].textContent} Minor`
+        
+        // Remove these intervals to avoid repeated detection
+        activeKeys.delete(root);
+        activeKeys.delete(root + 3);
+        activeKeys.delete(root + 7);
+        break; // stop checking after first chord detected
+      }else if (
+        activeKeys.has(root) &&
+        activeKeys.has(root + 3) &&
+        activeKeys.has(root + 6)
+      ) {
+        const div = document.querySelector(`div[data-interval="${root}"]`);
+        console.log("Diminished chord detected with root interval:", div.children[1].textContent);
+        // Optionally do something here (e.g., visual feedback)
+        const chordid = document.getElementById("chordIdentifier")
+        chordid.textContent = `${div.children[1].textContent} Diminished`
+        
+        // Remove these intervals to avoid repeated detection
+        activeKeys.delete(root);
+        activeKeys.delete(root + 4);
+        activeKeys.delete(root + 8);
+        break; // stop checking after first chord detected
+      }else if (
+        activeKeys.has(root) &&
+        activeKeys.has(root + 4) &&
+        activeKeys.has(root + 8)
+      ) {
+        const div = document.querySelector(`div[data-interval="${root}"]`);
+        console.log("Augmented chord detected with root interval:", div.children[1].textContent);
+        // Optionally do something here (e.g., visual feedback)
+        const chordid = document.getElementById("chordIdentifier")
+        chordid.textContent = `${div.children[1].textContent} Augmented`
+        
+        // Remove these intervals to avoid repeated detection
+        activeKeys.delete(root);
+        activeKeys.delete(root + 4);
+        activeKeys.delete(root + 8);
+        break; // stop checking after first chord detected
+      }
+      }
+    }
+  }, 200); // 300ms delay to allow key presses to "settle"
+});
+
+window.addEventListener("keyup", (e) => {
+  const key = document.querySelector(`.key[data-key="${e.code}"]`);
+  const chordid = document.getElementById("chordIdentifier")
+  if (!key) return;
+  const interval = parseInt(key.getAttribute("data-interval"));
+  activeKeys.delete(interval);
+  chordid.textContent = ''
+});
+
+// Assume activeKeys is a Set defined globally
+window.addEventListener("click", (e) => {
+  // Find the closest parent with class "key" (in case clicking on a child inside the .key div)
+  const key = e.target.closest(".key");
+  if (!key) return;
+
+  const keyCode = key.dataset.key;
+  const audio = document.querySelector(`audio[data-key="${keyCode}"]`);
+  if (!audio) return;
+
+  const interval = parseInt(key.dataset.interval);
+  activeKeys.add(interval);
+
+  // Play sound and show visual feedback
+  key.classList.add("active");
+  audio.currentTime = 0;
+  audio.play();
+  setTimeout(() => key.classList.remove("active"), 200);
+});
+</script>
+</body>
+</html>  
