@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<script type="module">
+  document.addEventListener("DOMContentLoaded", () => {
+    const hourHand = document.querySelector(".hour-hand");
+    const minHand = document.querySelector(".min-hand");
+    const secHand = document.querySelector(".second-hand");
+
+    const baseRotation = 180; // Optional: Flip the clock upside down
+    const numerals = document.getElementsByClassName("roman")
+
+
+    for(let i = 0; i < numerals.length; i++){
+        // numerals[i].style.transformOrigin= `0% 0%`;
+numerals[i].style.transform = `rotate(${(i + 1) * 30}deg) translateY(-120px) `;
+//rotate(${(-i - 1) * 30}deg) translateX(1px)
+
+    }
+    //const numbers = Array.from(numerals);
+
+    
+
+    function updateClock() {
+      const now = new Date();
+
+      const seconds = now.getSeconds();
+      const minutes = now.getMinutes();
+      const hours = now.getHours();
+
+      const secDeg = seconds * 6; // 360/60
+      const minDeg = minutes * 6 + seconds * 0.1; // smooth
+      const hourDeg = (hours % 12) * 30 + minutes * 0.5; // smooth
+
+      secHand.style.transform = `rotate(${baseRotation + secDeg}deg) translateY(-10px)`;
+      minHand.style.transform = `rotate(${baseRotation + minDeg}deg) translateY(-10px)`;
+      hourHand.style.transform = `rotate(${baseRotation + hourDeg}deg) translateY(-10px)`;
+    }
+
+    updateClock(); // Initial call
+    setInterval(updateClock, 1000);
+  });
+</script>
+<body>
+    <div class="clock">
+        <div class="clock-face">
+            <div class="hand hour-hand"></div>
+            <div class="hand min-hand"></div>
+            <div class="hand second-hand"></div>
+            <div class="numFace">
+                 <!-- top (0 deg) -->
+<div class="roman">I</div>   <!-- 30 deg -->
+<div class="roman">II</div>
+<div class="roman">III</div>
+<div class="roman">IV</div>
+<div class="roman">V</div>
+<div class="roman">VI</div>  <!-- 180 deg -->
+<div class="roman">VII</div>
+<div class="roman">VIII</div>
+<div class="roman">IX</div>
+<div class="roman">X</div>
+<div class="roman">XI</div> 
+<div class="roman">XII</div> <!-- 330 deg -->
+
+            </div>
+            
+        </div>
+    </div>
+    <audio src="clock-tick-tik-tak-76043-48k_biptick_sound.wav">
+        
+    </audio>
+    <style>
+        html{
+            background:red;
+            text-align: center;
+            font-size: 10px;
+        }
+
+        body,html{
+
+            display:flex;
+            width:auto;
+            height:100vh;
+            overflow:hidden;
+            justify-content: center;
+            align-items: center;
+        }
+
+
+        .clock-face{
+            position:relative;
+            width:100%;
+            height:100%;
+
+            
+
+        }
+        .clock{
+            position: relative;
+            width:30rem;
+            height:30rem;
+            border: black 10px  solid ;
+            border-radius: 30rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+
+.hand {
+  width: 6px;
+  background-color: black;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: 50% 0%;
+  transform: rotate(90deg) translateY(-10px);
+  border-radius: 10px;
+}
+
+
+
+        .hour-hand {
+  height: 60px;
+  transform: rotate(0deg) translateY(-10px);
+  transition: transform 2s ease-in;
+}
+
+.hour-hand:hover {
+  transform: rotate(360deg) translateY(-10px);
+}
+         .min-hand {
+  height: 80px;
+  transform: rotate(0deg) translateY(-10px);
+  transition: transform 0.3s cubic-bezier(0.075, 0.82, 0.165, 1);
+}
+
+.min-hand:hover {
+  transform: rotate(-360deg) translateY(-10px);
+}
+        .second-hand{
+            height: 100px;
+        }  
+        
+        
+        .roman{
+            position:absolute;
+
+            font-size: 20px;
+            width: 20px;
+            height:20px;
+            /* background-color: blue; */
+            display:flex;
+            align-items: center;
+            justify-content: center;
+            
+        }
+
+        .numFace{
+            position:relative;
+            left:50%;
+            top:50%;
+            transform-origin: 0% 50%;
+
+            width:200px;
+            height:100%;
+            transform: translateX(-11px) translateY(-7px);
+        }
+    </style>
+    
+</body>
+</html>
