@@ -1,21 +1,214 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Image Upload + Filters + Pixel Editing</title>
+<style>
+  :root {
+    --base: #ffc600;
+    --spacing: 10px;
+    --blur: 0px;
+  }
+
+  body {
+    font-family: sans-serif;
+    padding: 1rem;
+  }
+
+  #myCanvas {
+    display: block;
+    margin-bottom: 1rem;
+    background: var(--base);
+    padding: var(--spacing);
+    filter: blur(var(--blur));
+    max-width: 100%;
+  }
+
+  h1 {
+    color: var(--base);
+  }
+
+  .controls label {
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  .controls input[type="range"],
+  .controls input[type="number"],
+  .controls input[type="color"],
+  .controls input[type="file"] {
+    margin-left: 0.5rem;
+    vertical-align: middle;
+  }
+
+  fieldset {
+    border: 1px solid #ccc;
+    padding: 0.5rem;
+    margin-top: 1rem;
+  }
+</style>
 </head>
 <body>
+  <h1>Upload Image + Live Filters + Pixel Editing</h1>
+
+  <div class="controls">
     <label>
-        Spacing
-        <input type="text"></label>
-    <label>
-        Blur
-        <input type="text"></label>
-    <label>
-        Color
-        <input type="text">
+      Upload Image:
+      <input type="file" accept="image/*" id="uploadInput" />
     </label>
-    
+
+    <label>
+      Spacing
+      <input type="range" min="0" max="50" data-sizing="px" name="spacing" value="10" />
+    </label>
+
+    <label>
+      Blur
+      <input type="range" min="0" max="20" data-sizing="px" name="blur" value="0" />
+    </label>
+
+    <label>
+      Base Color
+      <input type="color" name="base" value="#ffc600" />
+    </label>
+
+    <fieldset>
+      <legend>RGB Pixel Adjustments</legend>
+      <label>
+        Red
+        <input type="number" min="-255" max="255" data-channel="R" value="0" />
+      </label>
+      <label>
+        Green
+        <input type="number" min="-255" max="255" data-channel="G" value="0" />
+      </label>
+      <label>
+        Blue
+        <input type="number" min="-255" max="255" data-channel="B" value="0" />
+      </label>
+      <label>
+        Grayscale
+        <button id="grayscale">Enable</button>
+      </label>
+    </fieldset>
+  </div>
+
+  <canvas id="myCanvas"></canvas>
+
+  <button id="downloadBtn">Download Filtered Image</button>
+
+<script>
+  const inputs = document.querySelectorAll('.controls input:not(#uploadInput)');
+  const uploadInput = document.getElementById('uploadInput');
+  const canvas = document.getElementById('myCanvas');
+  const ctx = canvas.getContext('2d');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const grayscale = document.getElementById('grayscale');
+
+  let img = new Image();
+  let imgLoaded = false;
+  let rgbAdjustments = { R: 0, G: 0, B: 0 };
+  let grayscaleEnabled = false;
+
+  function clamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+  }
+
+  function handleCSSInput() {
+    const suffix = this.dataset.sizing || '';
+    document.documentElement.style.setProperty(`--${this.name}`, this.value + suffix);
+    if (imgLoaded) updateCanvas();
+  }
+
+  function handleRGBInput() {
+    const channel = this.dataset.channel;
+    rgbAdjustments[channel] = Number(this.value);
+    if (imgLoaded) updateCanvas();
+  }
+
+  function updateCanvas() {
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+
+    const computedStyle = getComputedStyle(document.documentElement);
+    const blurValue = computedStyle.getPropertyValue('--blur').trim();
+    ctx.filter = `blur(${blurValue})`;
+
+    ctx.drawImage(img, 0, 0);
+
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const pixels = imageData.data;
+
+    for (let i = 0; i < pixels.length; i += 4) {
+      pixels[i] = clamp(pixels[i] + rgbAdjustments.R, 0, 255);       // R
+      pixels[i + 1] = clamp(pixels[i + 1] + rgbAdjustments.G, 0, 255); // G
+      pixels[i + 2] = clamp(pixels[i + 2] + rgbAdjustments.B, 0, 255); // B
+    }
+
+    if (grayscaleEnabled) {
+      for (let i = 0; i < pixels.length; i += 4) {
+        const avg = (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3;
+        pixels[i] = pixels[i + 1] = pixels[i + 2] = avg;
+      }
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+  }
+
+  inputs.forEach(input => {
+    if (input.dataset.channel) {
+      input.addEventListener('input', handleRGBInput);
+    } else {
+      input.addEventListener('input', handleCSSInput);
+    }
+  });
+
+  // Base color live update
+  document.querySelector('input[name="base"]').addEventListener('input', e => {
+    document.documentElement.style.setProperty('--base', e.target.value);
+  });
+
+  // Handle image upload
+  uploadInput.addEventListener('change', function () {
+    const file = this.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (event) {
+      img = new Image();
+      img.onload = function () {
+        imgLoaded = true;
+        updateCanvas();
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Grayscale toggle button
+  grayscale.addEventListener('click', (e) => {
+    e.preventDefault();
+    grayscaleEnabled = !grayscaleEnabled;
+    grayscale.textContent = grayscaleEnabled ? 'Disable' : 'Enable';
+    if (imgLoaded) updateCanvas();
+  });
+
+  // Download button
+  downloadBtn.addEventListener('click', () => {
+    if (!imgLoaded) return alert('Please upload an image first!');
+    const link = document.createElement('a');
+    link.download = 'filtered-image.png';
+    link.href = canvas.toDataURL();
+    link.click();
+  });
+
+  // Load default image on start
+  img.src = 'rayclouds.jpg';
+  img.onload = () => {
+    imgLoaded = true;
+    updateCanvas();
+  };
+</script>
 </body>
 </html>
