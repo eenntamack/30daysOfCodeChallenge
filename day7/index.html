@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        const people = [
+            {name: 'Wes', year:1988},
+            {name: 'Kait', year:1986},
+            {name: 'Irv', year:1970},
+            {name: 'Lux', year:2015},
+        ]
+
+        const comments = [
+            {text: 'Love this!', id :523423},
+            {text: 'Super Good!', id :823423},
+            {text: 'You are the best', id :2039842},
+            {text: 'Ramen is my favorite food ever', id :123523},
+            {text: 'Nice Nice Nice', id :524328}
+        ]
+
+
+        //Some and Every
+
+        //Array.prototype.some() is at least 1 person 19?
+        const isAdult = people.some(function(person){
+            const currentYear = (new Date()).getFullYear();
+            if(currentYear - person.year > 19){
+                return true;
+            }
+        })
+        console.log({isAdult})
+
+        //Array.prototype.every() //is everyone 19?
+
+        const everyAdult = people.every(function(person){
+            const currentYear = (new Date()).getFullYear();
+            if(currentYear - person.year > 19){
+                return true;
+            }})
+
+        console.log({everyAdult})
+
+        //Array.prototype.find() // just like filter() but find the first occurence of what 
+        //you're looking for
+        //find the comment with the id of 823423
+        const comment = comments.find(function(c){
+            if(c.id == 823423){
+                return true
+            }
+        })
+        console.log(comment)
+
+        //Array.prototype.findIndex() 
+        //Find the comment with this ID
+        //delete the comment with the ID of 823423
+        
+        const index = comments.findIndex(comment => comment.id === 823423)
+        console.log(index)
+        comments.splice(index,1)
+        console.table(comments)
+    </script>
+    
+</body>
+</html>
