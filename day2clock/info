@@ -1,0 +1,4 @@
+to run a server
+
+npm i -g http-server
+http-server . --cors
