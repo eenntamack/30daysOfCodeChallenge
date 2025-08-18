@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <p onclick="makeGreen()">xBREAKxDOWNx</p>
+    <script>
+        const dogs = [{ name : 'Snickers', age:2}, {name:'hugo', age:8}]
+        function makeGreen(){
+            const p = document.querySelector('p');
+            p.style.color = '#BADA55';
+            p.style.fontSize = '50px';
+        }
+        const par =document.querySelector('p')
+
+        //Different ways of logging
+
+        //Regular
+        console.log('hello')
+
+        //Interpolated
+        console.log('hello i am %s','Eric')
+        console.log('this is number %d',5)
+        //Styled
+        console.log('%c I am stylish','font-size:30px; color:red; background-color:green;')
+
+        //warning
+        console.warn('This is a warning!')
+        //error
+        console.error('EVERYThing has gone to poop!!')
+        //info
+        console.info('There are roughly 8billion people in the world today')
+        //testing
+        console.assert(1===2, 'Those 2 numbers are not equal!')
+        console.assert(par.classList.contains('ouch'), 'This paragrapgh does not contain ouch')
+        //clearing
+        //console.clear()
+
+        //Viewing DOM elements
+        console.log(par);
+        console.dir(par);
+
+        //Grouping together
+        dogs.forEach(dog=>{
+            console.group(`${dog.name}`)
+                console.log(`This is ${dog.name}`);
+                console.log(`It is ${dog.age}yrs old`)
+            console.groupEnd()
+        })
+
+        //counting
+        console.count('Hi');
+        console.count('Hi');
+        console.count('Hi');
+        console.count('Hi');
+        console.count('Hi');
+        console.count('Hi');
+
+        //timing
+        console.time('fetching data');
+            fetch('https://api.github.com/users/wesbos')
+            .then(data => data.json())
+            .then(data => {console.timeEnd('fetching data');})
+
+        //table
+        console.table(dogs)
+    </script>
+    
+</body>
+</html>
+<!--
+    When debugging you can check repsonses through sttribute modification by going to devtools
+    >right click > breakOn > attribute modifications > goes through each attribut one by one
+
+-->
